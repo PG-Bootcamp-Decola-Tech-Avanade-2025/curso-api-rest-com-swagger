@@ -41,15 +41,20 @@ public class UserController {
     @GetMapping("/{id}")
     public ResponseEntity<User> getById(@PathVariable UUID id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+
+        if(user.isEmpty()) {
+            throw new RuntimeException(String.format("Usuário de id %s não foi encontrado.", id));
+        }
+
+        return ResponseEntity.ok(user.get());
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<User> updateById(@PathVariable UUID id, @RequestBody EditorUserDto newUserDto) {
         Optional<User> user = userRepository.findById(id);
 
-        if (user.isEmpty()) {
-            return ResponseEntity.notFound().build();
+        if(user.isEmpty()) {
+            throw new RuntimeException(String.format("Usuário de id %s não foi encontrado.", id));
         }
 
         User persistedUser = user.get();
